@@ -20,5 +20,9 @@
 		"svelte": "^4.0.5",
 		"vite": "^4.4.2"
 	},
-	"type": "module"
+	"type": "module",
+	"dependencies": {
+		"@picocss/pico": "^1.5.10",
+		"firebase": "^10.5.2"
+	}
 }
