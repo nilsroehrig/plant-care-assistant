@@ -1,50 +1,102 @@
-<article class="grid">
-	<div>
-		<hgroup>
-			<h1>Sign in</h1>
-			<h2>Welcome to Plant Care Assistant</h2>
-		</hgroup>
-		<form>
-			<input
-				type="text"
-				name="login"
-				placeholder="Login"
-				aria-label="Login"
-				autocomplete="nickname"
-				required
-			/>
-			<input
-				type="password"
-				name="password"
-				placeholder="Password"
-				aria-label="Password"
-				autocomplete="current-password"
-				required
-			/>
-			<fieldset>
-				<label for="remember">
-					<input type="checkbox" role="switch" id="remember" name="remember" />
-					Remember me
-				</label>
-			</fieldset>
-			<button type="submit" onclick="event.preventDefault()">Login</button>
-		</form>
-	</div>
-	<div class="image" />
-</article>
-<p>
-	Photo by <a
-		href="https://unsplash.com/de/@feeypflanzen?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash"
-		>feey</a
-	>
-	on
-	<a
-		href="https://unsplash.com/de/fotos/grune-pflanze-im-weissen-topf-qoegZJ3ybOY?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash"
-		>Unsplash</a
-	>
-</p>
+<script lang="ts">
+	import { goto } from '$app/navigation';
+	import { signInWithEmailAndPassword } from 'firebase/auth';
+	import { getContext } from 'svelte';
+	import { fade } from 'svelte/transition';
+	import type { FirebaseStore } from '../+layout.svelte';
+
+	const firebase = getContext<FirebaseStore>('firebase');
+
+	let error = {
+		message: null as null | string
+	};
+
+	let busy = false;
+
+	$: disabled = $firebase.auth == null;
+
+	function tryLogin({ target }: SubmitEvent) {
+		busy = true;
+
+		if (!(target instanceof HTMLFormElement) || $firebase.auth == null) {
+			return;
+		}
+
+		const data = new FormData(target);
+		const email = data.get('email');
+		const password = data.get('password');
+
+		if (typeof email !== 'string' || typeof password !== 'string') {
+			return;
+		}
+
+		signInWithEmailAndPassword($firebase.auth, email, password)
+			.then(() => {
+				return goto('/app');
+			})
+			.catch((e) => {
+				console.log(e.code);
+				if (['auth/invalid-login-credentials', "auth/user-not-found"].includes(e.code)) {
+					error.message = 'Ungültige Zugangsdaten.';
+				}
+			})
+			.finally(() => {
+				busy = false;
+			});
+	}
+</script>
+
+<main class="container">
+	<article class="grid">
+		<div>
+			<hgroup>
+				<h1>Sign in</h1>
+				<h2>Welcome to Plant Care Assistant</h2>
+			</hgroup>
+			<form on:submit|preventDefault={tryLogin}>
+				<input
+					type="text"
+					name="email"
+					placeholder="E-Mail"
+					aria-label="E-Mail"
+					autocomplete="email"
+					required
+					{disabled}
+				/>
+				<input
+					type="password"
+					name="password"
+					placeholder="Password"
+					aria-label="Password"
+					autocomplete="current-password"
+					required
+					{disabled}
+				/>
+				{#if error.message != null}
+					<p class="error" transition:fade>{error.message}</p>
+				{/if}
+				<button type="submit" aria-busy={busy} {disabled}>Login</button>
+			</form>
+		</div>
+		<div class="image" />
+	</article>
+	<p class="attribution">
+		Photo by <a
+			href="https://unsplash.com/de/@feeypflanzen?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash"
+			>feey</a
+		>
+		on
+		<a
+			href="https://unsplash.com/de/fotos/grune-pflanze-im-weissen-topf-qoegZJ3ybOY?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash"
+			>Unsplash</a
+		>
+	</p>
+</main>
 
 <style>
+	main {
+		align-self: center;
+	}
 	article {
 		padding: 0;
 		overflow: hidden;
@@ -54,7 +106,11 @@
 		padding: 1rem;
 	}
 
-	p {
+	.error {
+		color: var(--del-color);
+	}
+
+	.attribution {
 		text-align: right;
 		font-size: smaller;
 		padding: 0.5rem;
