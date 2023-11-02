@@ -16,11 +16,16 @@
 		connectAuthEmulator,
 		getAuth,
 		onAuthStateChanged,
+		onIdTokenChanged,
 		signOut,
-		type Auth
+		type Auth,
+		type Unsubscribe
 	} from 'firebase/auth';
-	import { setContext } from 'svelte';
+	import Cookies from 'js-cookie';
+	import { onDestroy, setContext } from 'svelte';
 	import { readonly, writable, type Readable, type Writable } from 'svelte/store';
+
+	const subscriptions: Unsubscribe[] = [];
 
 	const firebaseStore: Writable<FirebaseStoreData> = writable({
 		app: null,
@@ -46,12 +51,23 @@
 
 		connectAuthEmulator(auth, 'http://localhost:9099');
 
-		onAuthStateChanged(auth, () => {
-			firebaseStore.set({
-				app,
-				auth
-			});
-		});
+		subscriptions.push(
+			onAuthStateChanged(auth, () => {
+				firebaseStore.set({
+					app,
+					auth
+				});
+			})
+		);
+
+		subscriptions.push(
+			onIdTokenChanged(auth, (user) => {
+				user
+					?.getIdToken()
+					.then((token) => Cookies.set('idToken', token, { expires: 1 / 48 }))
+					.catch(console.error);
+			})
+		);
 	}
 
 	setContext('firebase', readonly(firebaseStore));
@@ -65,9 +81,15 @@
 		}
 
 		return signOut($firebaseStore.auth)
+			.then(() => Cookies.remove('idToken'))
 			.catch(console.error)
 			.finally(() => (isLoggingOut = false));
 	}
+
+	onDestroy(() => {
+		subscriptions.forEach((unsubscribe) => unsubscribe());
+		subscriptions.length = 0;
+	});
 </script>
 
 <div class="wrapper">

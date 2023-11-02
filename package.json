@@ -15,6 +15,7 @@
 	"devDependencies": {
 		"@sveltejs/adapter-auto": "^2.0.0",
 		"@sveltejs/kit": "^1.20.4",
+		"@types/js-cookie": "^3.0.5",
 		"@typescript-eslint/eslint-plugin": "^6.0.0",
 		"@typescript-eslint/parser": "^6.0.0",
 		"eslint": "^8.28.0",
@@ -31,6 +32,8 @@
 	"type": "module",
 	"dependencies": {
 		"@picocss/pico": "^1.5.10",
-		"firebase": "^10.5.2"
+		"firebase": "^10.5.2",
+		"firebase-admin": "^11.11.0",
+		"js-cookie": "^3.0.5"
 	}
 }

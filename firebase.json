@@ -7,7 +7,8 @@
       "**/node_modules/**"
     ],
     "frameworksBackend": {
-      "region": "europe-west1"
+      "region": "europe-west1",
+      "maxInstances": 1
     }
   },
   "emulators": {

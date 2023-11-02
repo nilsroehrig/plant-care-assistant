@@ -1,10 +1,9 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
 	import { signInWithEmailAndPassword } from 'firebase/auth';
-	import { getContext } from 'svelte';
+	import { getContext, tick } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import type { FirebaseStore } from '../+layout.svelte';
-
+	
 	const firebase = getContext<FirebaseStore>('firebase');
 
 	let error = {
@@ -31,13 +30,9 @@
 		}
 
 		signInWithEmailAndPassword($firebase.auth, email, password)
-			.then(() => {
-				return goto('/app');
-			})
 			.catch((e) => {
-				console.log(e.code);
 				if (['auth/invalid-login-credentials', "auth/user-not-found"].includes(e.code)) {
-					error.message = 'Ungültige Zugangsdaten.';
+					error.message = 'Invalid credentials.';
 				}
 			})
 			.finally(() => {
@@ -53,7 +48,7 @@
 				<h1>Sign in</h1>
 				<h2>Welcome to Plant Care Assistant</h2>
 			</hgroup>
-			<form on:submit|preventDefault={tryLogin}>
+			<form on:submit|preventDefault={tryLogin} method="post">
 				<input
 					type="text"
 					name="email"
