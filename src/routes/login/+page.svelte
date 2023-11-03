@@ -1,9 +1,10 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import { signInWithEmailAndPassword } from 'firebase/auth';
-	import { getContext, tick } from 'svelte';
+	import { getContext } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import type { FirebaseStore } from '../+layout.svelte';
-	
+
 	const firebase = getContext<FirebaseStore>('firebase');
 
 	let error = {
@@ -30,10 +31,9 @@
 		}
 
 		signInWithEmailAndPassword($firebase.auth, email, password)
+			.then(() => goto('/app'))
 			.catch((e) => {
-				if (['auth/invalid-login-credentials', "auth/user-not-found"].includes(e.code)) {
-					error.message = 'Invalid credentials.';
-				}
+				error.message = 'Invalid credentials.';
 			})
 			.finally(() => {
 				busy = false;

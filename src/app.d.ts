@@ -1,9 +1,13 @@
+import { app } from 'firebase-admin';
+
 // See https://kit.svelte.dev/docs/types#app
 // for information about these interfaces
 declare global {
 	namespace App {
 		// interface Error {}
-		// interface Locals {}
+		interface Locals {
+			app: app.App;
+		}
 		// interface PageData {}
 		// interface Platform {}
 	}

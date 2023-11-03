@@ -8,8 +8,11 @@
 </script>
 
 <script lang="ts">
-	import { browser } from '$app/environment';
+	import '$lib/styles/global.css';
 	import '@picocss/pico';
+
+	import { browser } from '$app/environment';
+	import { config } from '$lib/config/firebaseConfig';
 	import { initializeApp, type FirebaseApp } from 'firebase/app';
 	import {
 		browserSessionPersistence,
@@ -23,7 +26,9 @@
 	} from 'firebase/auth';
 	import Cookies from 'js-cookie';
 	import { onDestroy, setContext } from 'svelte';
+	import { Icon, Plus } from 'svelte-hero-icons';
 	import { readonly, writable, type Readable, type Writable } from 'svelte/store';
+	import { goto } from '$app/navigation';
 
 	const subscriptions: Unsubscribe[] = [];
 
@@ -34,14 +39,7 @@
 
 	if (browser) {
 		// Your web app's Firebase configuration
-		const firebaseConfig = {
-			apiKey: 'AIzaSyCXM-aOfj75tbwTYU9IC4SLlVnLsjzo4T0',
-			authDomain: 'fir-playground-22c29.firebaseapp.com',
-			projectId: 'fir-playground-22c29',
-			storageBucket: 'fir-playground-22c29.appspot.com',
-			messagingSenderId: '749449297551',
-			appId: '1:749449297551:web:cb398016eb7c9f57a2bafa'
-		};
+		const firebaseConfig = config;
 
 		// Initialize Firebase
 		const app = initializeApp(firebaseConfig);
@@ -64,7 +62,7 @@
 			onIdTokenChanged(auth, (user) => {
 				user
 					?.getIdToken()
-					.then((token) => Cookies.set('idToken', token, { expires: 1 / 48 }))
+					.then((token) => Cookies.set('idToken', token, { expires: 1 / 48, sameSite: 'Strict' }))
 					.catch(console.error);
 			})
 		);
@@ -76,12 +74,16 @@
 
 	function logout() {
 		isLoggingOut = true;
+
 		if ($firebaseStore.auth == null) {
 			return;
 		}
 
 		return signOut($firebaseStore.auth)
-			.then(() => Cookies.remove('idToken'))
+			.then(() => {
+				Cookies.remove('idToken');
+				goto('/');
+			})
 			.catch(console.error)
 			.finally(() => (isLoggingOut = false));
 	}
@@ -99,18 +101,24 @@
 				<li><strong>Plant Care Assistant</strong></li>
 			</ul>
 			<ul>
-				<li>
-					{#if $firebaseStore.auth?.currentUser}
+				{#if $firebaseStore.auth?.currentUser}
+					<li>
+						<a href="/app/create-plant" role="button" class="outline"
+							><Icon src={Plus} size="20" /> Create Plant</a
+						>
+					</li>
+					<li>
 						<a
 							href="/logout"
 							role="button"
 							aria-busy={isLoggingOut}
+							class="secondary outline"
 							on:click|preventDefault={logout}>Logout</a
 						>
-					{:else}
-						<a href="/login" role="button">Login</a>
-					{/if}
-				</li>
+					</li>
+				{:else}
+					<li><a href="/login" role="button" class="secondary outline">Login</a></li>
+				{/if}
 			</ul>
 		</nav>
 	</header>
@@ -125,6 +133,11 @@
 		display: grid;
 		min-height: 100vh;
 		grid-template-rows: min-content 1fr min-content;
+	}
+
+	li a {
+		display: flex;
+		align-items: center;
 	}
 
 	footer {

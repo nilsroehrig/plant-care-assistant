@@ -5,10 +5,21 @@
 	const firebase = getContext<FirebaseStore>('firebase');
 </script>
 
-<main class="container">
+<article>
+	<header>Login Status</header>
 	{#if $firebase.auth?.currentUser}
-		<h1 style:color="green">Logged in on client! Hello {$firebase.auth.currentUser.displayName}.</h1>
+		<p>Hello {$firebase.auth.currentUser.displayName}, you are currently logged in.</p>
 	{:else}
-		<h1 style:color="red">Not logged in on client!</h1>
+		<p class="logged-out">You are currently not logged in.</p>
 	{/if}
-</main>
+</article>
+
+<style>
+	p {
+		color: var(--ins-color);
+	}
+
+	.logged-out {
+		color: var(--del-color);
+	}
+</style>
