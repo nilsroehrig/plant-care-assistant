@@ -13,13 +13,13 @@
 {#if !user}
 	<article aria-busy="true"></article>
 {:else}
-	<article>
-		<hgroup>
-			<h1>Hi {user.displayName},</h1>
-			<h2>Take a look at your plants here!</h2>
-		</hgroup>
-	</article>
-	<div class="plants">
+	<div class="dashboard">
+		<article class="header">
+			<hgroup>
+				<h1>Hi {user.displayName},</h1>
+				<h2>Take a look at your plants here!</h2>
+			</hgroup>
+		</article>
 		{#each data.plants as plant}
 			<PlantCard {plant} />
 		{/each}
@@ -27,12 +27,22 @@
 {/if}
 
 <style>
-	hgroup {
-		margin-bottom: 0;
-	}
-
-	.plants {
+	.dashboard {
 		display: grid;
 		grid-template-columns: repeat(3, 1fr);
+		gap: 1.5rem;
+		margin-top: 1rem;
+	}
+
+	.dashboard > article {
+		margin: 0;
+	}
+
+	.header {
+		grid-column: 1 / -1;
+	}
+
+	hgroup {
+		margin-bottom: 0;
 	}
 </style>

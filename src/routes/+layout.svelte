@@ -38,11 +38,8 @@
 	});
 
 	if (browser) {
-		// Your web app's Firebase configuration
-		const firebaseConfig = config;
-
 		// Initialize Firebase
-		const app = initializeApp(firebaseConfig);
+		const app = initializeApp(config);
 		const auth = getAuth(app);
 
 		auth.setPersistence(browserSessionPersistence).catch(console.error);
@@ -62,7 +59,7 @@
 			onIdTokenChanged(auth, (user) => {
 				user
 					?.getIdToken()
-					.then((token) => Cookies.set('idToken', token, { expires: 1 / 48, sameSite: 'Strict' }))
+					.then((token) => Cookies.set('idToken', token, { expires: 1 / 24, sameSite: 'Strict' }))
 					.catch(console.error);
 			})
 		);
