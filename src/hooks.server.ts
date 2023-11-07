@@ -14,7 +14,8 @@ export async function handle({ resolve, event }) {
 		}
 
 		try {
-			await getAuth(event.locals.app).verifyIdToken(idToken);
+			const decodedIdToken = await getAuth(event.locals.app).verifyIdToken(idToken);
+			event.locals.uid = decodedIdToken.uid;
 		} catch (e) {
 			functions.logger.error(e);
 			throw redirect(302, '/login');

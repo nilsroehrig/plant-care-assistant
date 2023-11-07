@@ -1,25 +1,38 @@
 <script lang="ts">
 	import { getContext } from 'svelte';
 	import type { FirebaseStore } from '../+layout.svelte';
+	import PlantCard from '$lib/components/PlantCard.svelte';
 
 	const firebase = getContext<FirebaseStore>('firebase');
+
+	export let data;
+
+	$: user = $firebase.auth?.currentUser;
 </script>
 
-<article>
-	<header>Login Status</header>
-	{#if $firebase.auth?.currentUser}
-		<p>Hello {$firebase.auth.currentUser.displayName}, you are currently logged in.</p>
-	{:else}
-		<p class="logged-out">You are currently not logged in.</p>
-	{/if}
-</article>
+{#if !user}
+	<article aria-busy="true"></article>
+{:else}
+	<article>
+		<hgroup>
+			<h1>Hi {user.displayName},</h1>
+			<h2>Take a look at your plants here!</h2>
+		</hgroup>
+	</article>
+	<div class="plants">
+		{#each data.plants as plant}
+			<PlantCard {plant} />
+		{/each}
+	</div>
+{/if}
 
 <style>
-	p {
-		color: var(--ins-color);
+	hgroup {
+		margin-bottom: 0;
 	}
 
-	.logged-out {
-		color: var(--del-color);
+	.plants {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
 	}
 </style>

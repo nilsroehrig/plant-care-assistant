@@ -7,6 +7,7 @@ declare global {
 		// interface Error {}
 		interface Locals {
 			app: app.App;
+			uid?: string;
 		}
 		// interface PageData {}
 		// interface Platform {}

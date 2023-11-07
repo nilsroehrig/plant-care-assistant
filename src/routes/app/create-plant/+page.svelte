@@ -30,7 +30,7 @@
 	<article>
 		<header>Create a new plant</header>
 		<div class="body">
-			<p style:order={4} style:text-align="right">
+			<p style:order={5} style:text-align="right">
 				<small>Fields marked with <span class="required">*</span> are required.</small>
 			</p>
 			<div class="grid row" style:order={1}>
@@ -106,6 +106,16 @@
 				{#each getErrors('instructions') as error}
 					<p>{error}</p>
 				{/each}
+			</label>
+			<label style:order={4} class="row">
+				<span>Plant Image URL</span>
+				<input
+					type="url"
+					name="plant_image_url"
+					placeholder="https://path.to/plant/image"
+					aria-invalid={isInvalid('plant_image_url')}
+					value={getFieldValue('plant_image_url')}
+				/>
 			</label>
 		</div>
 		<button type="submit">Create plant</button>

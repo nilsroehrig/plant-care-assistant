@@ -9,8 +9,19 @@ const PlantFormSchema = z.object({
 	name: z.string().min(3),
 	watering_interval: z.coerce.number().int().positive(),
 	watering_amount: z.coerce.number().int().positive(),
-	last_watering: z.preprocess((v) => (v === '' ? null : v), z.string().datetime().nullable()),
-	instructions: z.preprocess((v) => (v === '' ? null : v), z.string().nullable())
+	last_watering: z.preprocess((v) => {
+		if (typeof v !== 'string') {
+			return v;
+		}
+		if (v == '') {
+			return null;
+		}
+		const foo = new Date(v).toISOString();
+		console.log(foo);
+		return foo;
+	}, z.string().datetime().nullable()),
+	instructions: z.preprocess((v) => (v === '' ? null : v), z.string().nullable()),
+	plant_image_url: z.preprocess((v) => (v === '' ? null : v), z.string().url().nullable())
 });
 
 export const actions = {
@@ -21,13 +32,15 @@ export const actions = {
 		const watering_amount = data.get('watering_amount');
 		const last_watering = data.get('last_watering');
 		const instructions = data.get('instructions');
+		const plant_image_url = data.get('plant_image_url');
 
 		const plantFormData = {
 			name,
 			watering_interval,
 			watering_amount,
 			last_watering,
-			instructions
+			instructions,
+			plant_image_url
 		};
 
 		const formParseResult = PlantFormSchema.safeParse(plantFormData);
@@ -69,7 +82,9 @@ export const actions = {
 				amountPerWateringInMilliliters: formParseResult.data.watering_amount,
 				lastWatered: getLastWateredValue(formParseResult.data.last_watering),
 				furtherInstructions: formParseResult.data.instructions,
-				owner: uid
+				owner: uid,
+				created: FieldValue.serverTimestamp(),
+				imageUrl: formParseResult.data.plant_image_url ?? '/placeholder.png'
 			});
 		} catch (e) {
 			functions.logger.error(e);
