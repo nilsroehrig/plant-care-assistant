@@ -5,11 +5,7 @@ import { DateTime } from 'luxon';
 import { z, type ZodIssue } from 'zod';
 import functions from 'firebase-functions';
 
-const PlantFormSchema = z.object({
-	name: z.string().min(3),
-	watering_interval: z.coerce.number().int().positive(),
-	watering_amount: z.coerce.number().int().positive(),
-	last_watering: z.preprocess((v) => {
+const DateSchema = z.preprocess((v) => {
 		if (typeof v !== 'string') {
 			return v;
 		}
@@ -19,9 +15,18 @@ const PlantFormSchema = z.object({
 		const foo = new Date(v).toISOString();
 		console.log(foo);
 		return foo;
-	}, z.string().datetime().nullable()),
+	}, z.string().datetime().nullable())
+
+const PlantFormSchema = z.object({
+	name: z.string().min(3),
+	watering_interval: z.coerce.number().int().positive(),
+	watering_amount: z.coerce.number().int().positive(),
+	last_watering: DateSchema,
 	instructions: z.preprocess((v) => (v === '' ? null : v), z.string().nullable()),
-	plant_image_url: z.preprocess((v) => (v === '' ? null : v), z.string().url().nullable())
+	plant_image_url: z.preprocess((v) => (v === '' ? null : v), z.string().url().nullable()),
+	fertilizing_interval: z.coerce.number().int().positive(),
+	fertilizing_amount: z.coerce.number().int().positive(),
+	last_fertilizing: DateSchema
 });
 
 export const actions = {
@@ -33,6 +38,9 @@ export const actions = {
 		const last_watering = data.get('last_watering');
 		const instructions = data.get('instructions');
 		const plant_image_url = data.get('plant_image_url');
+		const fertilizing_interval = data.get('fertilizing_interval');
+		const fertilizing_amount = data.get('fertilizing_amount');
+		const last_fertilizing = data.get('last_fertilizing');
 
 		const plantFormData = {
 			name,
@@ -40,7 +48,10 @@ export const actions = {
 			watering_amount,
 			last_watering,
 			instructions,
-			plant_image_url
+			plant_image_url,
+			fertilizing_interval,
+			fertilizing_amount,
+			last_fertilizing
 		};
 
 		const formParseResult = PlantFormSchema.safeParse(plantFormData);
@@ -80,11 +91,14 @@ export const actions = {
 				name: formParseResult.data.name,
 				wateringIntervalInHours: formParseResult.data.watering_interval,
 				amountPerWateringInMilliliters: formParseResult.data.watering_amount,
-				lastWatered: getLastWateredValue(formParseResult.data.last_watering),
+				lastWatered: toUTCOrServerTimestamp(formParseResult.data.last_watering),
 				furtherInstructions: formParseResult.data.instructions,
 				owner: uid,
 				created: FieldValue.serverTimestamp(),
-				imageUrl: formParseResult.data.plant_image_url ?? '/placeholder.png'
+				imageUrl: formParseResult.data.plant_image_url ?? '/placeholder.png',
+				fertilizingIntervalInWeeks: formParseResult.data.fertilizing_interval,
+				amountPerFertilizingInGrams: formParseResult.data.fertilizing_amount,
+				lastFertilized: toUTCOrServerTimestamp(formParseResult.data.last_fertilizing)
 			});
 		} catch (e) {
 			functions.logger.error(e);
@@ -110,7 +124,7 @@ function toFormattedErrors(formattedIssues: Record<string, string[]>, issue: Zod
 	return formattedIssues;
 }
 
-function getLastWateredValue(publicationDate: string | null) {
+function toUTCOrServerTimestamp(publicationDate: string | null) {
 	return publicationDate
 		? Timestamp.fromDate(DateTime.fromISO(publicationDate, { zone: 'Europe/Berlin' }).toJSDate())
 		: FieldValue.serverTimestamp();

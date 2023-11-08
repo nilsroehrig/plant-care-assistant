@@ -24,6 +24,7 @@ const Plant = z.object({
 });
 
 export const PlantDto = z.object({
+	id: z.string(),
 	name: z.string(),
 	wateringIntervalInHours: z.number(),
 	amountPerWateringInMilliliters: z.number(),

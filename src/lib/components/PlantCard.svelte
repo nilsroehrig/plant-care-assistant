@@ -37,14 +37,14 @@
 	</div>
 	<div class="actions">
 		{#if plant.furtherInstructions}
-			<button class="outline contrast small" data-tooltip="Instructions" data-placement="top">
+			<button class="contrast small" data-tooltip="Instructions" data-placement="top">
 				<Icon src={Clipboard} width={20} />
 			</button>
 		{/if}
 		<a
-			href="/app/edit-plant"
+			href="/app/edit-plant/{plant.id}"
 			role="button"
-			class="outline contrast small"
+			class="contrast small"
 			data-tooltip="Edit"
 			data-placement="top"
 		>
@@ -92,8 +92,8 @@
 	.actions button,
 	.actions a {
 		margin-bottom: 0;
-		width: 3rem;
-		height: 3rem;
+		width: 2.5rem;
+		height: 2.5rem;
 		border-radius: 50%;
 	}
 

@@ -30,27 +30,27 @@
 	<article>
 		<header>Create a new plant</header>
 		<div class="body">
-			<p style:order={5} style:text-align="right">
+			<p style:order={6} style:text-align="right">
 				<small>Fields marked with <span class="required">*</span> are required.</small>
 			</p>
-			<div class="grid row" style:order={1}>
+			<label class="row" style:order={1}>
+				<span class="required">*</span> Plant name
+				<input
+					type="text"
+					name="name"
+					placeholder="Cactus"
+					aria-required="true"
+					required
+					aria-invalid={isInvalid('name')}
+					value={getFieldValue('name')}
+				/>
+				{#each getErrors('name') as error}
+					<p>{error}</p>
+				{/each}
+			</label>
+			<div class="grid row" style:order={2}>
 				<label>
-					<span class="required">*</span> Plant name
-					<input
-						type="text"
-						name="name"
-						placeholder="Cactus"
-						aria-required="true"
-						required
-						aria-invalid={isInvalid('name')}
-						value={getFieldValue('name')}
-					/>
-					{#each getErrors('name') as error}
-						<p>{error}</p>
-					{/each}
-				</label>
-				<label>
-					<span class="required">*</span> Watering interval in hours
+					<span class="required">*</span> Watering interval in <abbr title="hours">h</abbr>
 					<input
 						type="number"
 						name="watering_interval"
@@ -64,10 +64,8 @@
 						<p>{error}</p>
 					{/each}
 				</label>
-			</div>
-			<div class="grid row" style:order={2}>
 				<label>
-					<span class="required">*</span> Amount per watering in ml
+					<span class="required">*</span> Amount per watering in <abbr title="milliliters">ml</abbr>
 					<input
 						type="number"
 						name="watering_amount"
@@ -94,7 +92,63 @@
 					{/each}
 				</label>
 			</div>
-			<label style:order={3} class="row">
+			<div class="grid row" style:order={3}>
+				<label>
+					<span class="required">*</span> Fertilizing interval in weeks
+					<input
+						type="number"
+						name="fertilizing_interval"
+						placeholder="5"
+						aria-required="true"
+						required
+						aria-invalid={isInvalid('fertilizing_interval')}
+						value={getFieldValue('fertilizing_interval')}
+					/>
+					{#each getErrors('fertilizing_interval') as error}
+						<p>{error}</p>
+					{/each}
+				</label>
+				<label>
+					<span class="required">*</span> Amount per Fertilizing in <abbr title="grams">g</abbr>
+					<input
+						type="number"
+						name="fertilizing_amount"
+						placeholder="12"
+						aria-required="true"
+						required
+						aria-invalid={isInvalid('fertilizing_amount')}
+						value={getFieldValue('fertilizing_amount')}
+					/>
+					{#each getErrors('fertilizing_amount') as error}
+						<p>{error}</p>
+					{/each}
+				</label>
+				<label>
+					Last fertilizing
+					<input
+						type="datetime-local"
+						name="last_fertilizing"
+						aria-invalid={isInvalid('last_fertilizing')}
+						value={getFieldValue('last_fertilizing')}
+					/>
+					{#each getErrors('last_fertilizing') as error}
+						<p>{error}</p>
+					{/each}
+				</label>
+			</div>
+			<div class="grid row" style:order={4}>
+				<label>
+					<span>Plant Image URL</span>
+					<input
+						type="url"
+						name="plant_image_url"
+						placeholder="https://path.to/plant/image"
+						aria-invalid={isInvalid('plant_image_url')}
+						value={getFieldValue('plant_image_url')}
+					/>
+				</label>
+			</div>
+			<label style:order={5} class="row">
 				Further instructions
 				<textarea
 					name="instructions"
@@ -107,18 +161,11 @@
 					<p>{error}</p>
 				{/each}
 			</label>
-			<label style:order={4} class="row">
-				<span>Plant Image URL</span>
-				<input
-					type="url"
-					name="plant_image_url"
-					placeholder="https://path.to/plant/image"
-					aria-invalid={isInvalid('plant_image_url')}
-					value={getFieldValue('plant_image_url')}
-				/>
-			</label>
 		</div>
-		<button type="submit">Create plant</button>
+		<div class="grid row">
+			<button type="submit" style:order={2} style:margin-bottom={0}>Create plant</button>
+			<a role="button" href="/app" type="button" class="secondary" style:order={1}>Cancel</a>
+		</div>
 	</article>
 </form>
 
