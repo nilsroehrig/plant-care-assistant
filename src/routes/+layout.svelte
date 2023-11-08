@@ -11,12 +11,11 @@
 	import '$lib/styles/global.css';
 	import '@picocss/pico';
 
-	import { browser } from '$app/environment';
+	import { browser, dev } from '$app/environment';
 	import { config } from '$lib/config/firebaseConfig';
 	import { initializeApp, type FirebaseApp } from 'firebase/app';
 	import {
 		browserSessionPersistence,
-		connectAuthEmulator,
 		getAuth,
 		onAuthStateChanged,
 		onIdTokenChanged,
@@ -44,8 +43,6 @@
 
 		auth.setPersistence(browserSessionPersistence).catch(console.error);
 
-		connectAuthEmulator(auth, 'http://localhost:9099');
-
 		subscriptions.push(
 			onAuthStateChanged(auth, () => {
 				firebaseStore.set({
@@ -56,6 +53,7 @@
 		);
 
 		subscriptions.push(
+			// TODO: as stated in login/+page.svelte, the cookie is not working for us. Instead, e.g. a session refresh could be triggered, once the idToken changes.
 			onIdTokenChanged(auth, (user) => {
 				user
 					?.getIdToken()

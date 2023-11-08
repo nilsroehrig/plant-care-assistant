@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
 	import { signInWithEmailAndPassword } from 'firebase/auth';
+	import Cookies from 'js-cookie';
 	import { getContext } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import type { FirebaseStore } from '../+layout.svelte';
@@ -31,8 +31,15 @@
 		}
 
 		signInWithEmailAndPassword($firebase.auth, email, password)
-			.then(() => goto('/app'))
+			.then(async (userCred) => {
+				const token = await userCred.user.getIdToken();
+				// TODO: using a cookie does not work here. The idToken must be transferred to the server in another fashion
+				// (e.g. hidden form field or Authorization header). See hooks.server.ts for further steps after that.
+				Cookies.set('idToken', token, { expires: 1 / 24, sameSite: 'Strict' });
+				target.submit();
+			})
 			.catch((e) => {
+				console.error(e);
 				error.message = 'Invalid credentials.';
 			})
 			.finally(() => {
