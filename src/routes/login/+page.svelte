@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { signInWithEmailAndPassword } from 'firebase/auth';
+  import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
   import { enhance } from '$app/forms';
   import { getContext } from 'svelte';
   import { fade } from 'svelte/transition';
@@ -10,6 +10,8 @@
   let error = {
     message: null as null | string
   };
+
+  const auth = getAuth($firebase.app);
 
   let busy = false;
 </script>
@@ -27,7 +29,7 @@
 				const password = formData.get("password");
 
 				try {
-          const userCred = await signInWithEmailAndPassword($firebase.auth, email, password)
+          const userCred = await signInWithEmailAndPassword(auth, email, password)
           const token = await userCred.user.getIdToken();
           formData.set("idToken", token);
 				} catch(e) {

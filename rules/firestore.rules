@@ -20,7 +20,7 @@ service cloud.firestore {
 
     match /notifications/{notificationId} {
       allow read: if isAuthenticated();
-      allow write: if false;
+      allow write: if isAuthenticated();
       allow create: if false;
       allow update: if false;
     }

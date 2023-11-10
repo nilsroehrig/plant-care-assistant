@@ -1,7 +1,8 @@
 <script lang="ts" context="module">
+  import type { Readable } from "svelte/store";
+
   type FirebaseStoreData = {
-    app: FirebaseApp | null;
-    auth: Auth | null;
+    app: FirebaseApp;
   };
 
   export type FirebaseStore = Readable<FirebaseStoreData>;
@@ -17,53 +18,28 @@
   import {
     browserSessionPersistence,
     getAuth,
-    onAuthStateChanged,
-    onIdTokenChanged,
     signOut,
-    type Auth,
     type Unsubscribe
   } from 'firebase/auth';
-  import Cookies from 'js-cookie';
   import { onDestroy, setContext } from 'svelte';
   import { Icon, Plus } from 'svelte-hero-icons';
-  import { readonly, writable, type Readable, type Writable } from 'svelte/store';
-  import { goto } from '$app/navigation';
+  import { readonly, writable, type Writable } from 'svelte/store';
   import { enhance } from '$app/forms';
+  import type { Auth } from 'firebase/auth';
 
   const subscriptions: Unsubscribe[] = [];
 
+  const app = initializeApp(config);
   const firebaseStore: Writable<FirebaseStoreData> = writable({
-    app: null,
-    auth: null
+    app,
   });
-
-  if (browser) {
-    // Initialize Firebase
-    const app = initializeApp(config);
-    const auth = getAuth(app);
-
-    auth.setPersistence(browserSessionPersistence).catch(console.error);
-
-    subscriptions.push(
-      onAuthStateChanged(auth, () => {
-        firebaseStore.set({
-          app,
-          auth
-        });
-      })
-    );
-
-    subscriptions.push(
-      onIdTokenChanged(auth, (user) => {
-        user
-          ?.getIdToken()
-          .then((token) => Cookies.set('idToken', token, {expires: 1 / 24, sameSite: 'Strict'}))
-          .catch(console.error);
-      })
-    );
-  }
-
   setContext('firebase', readonly(firebaseStore));
+
+  let auth: Auth;
+  if (browser) {
+    auth = getAuth(app);
+    auth.setPersistence(browserSessionPersistence).catch(console.error);
+  }
 
   let isLoggingOut = false;
 
@@ -80,7 +56,7 @@
         <li><strong>Plant Care Assistant</strong></li>
       </ul>
       <ul>
-        {#if $firebaseStore.auth?.currentUser}
+        {#if auth?.currentUser}
           <li>
             <a href="/app/create-plant" role="button" class="outline"
             >
@@ -92,7 +68,7 @@
             <form method="POST" action="/login?/logout" use:enhance={async () => {
 							isLoggingOut = true;
 							try {
-								await signOut($firebaseStore.auth)
+								await signOut(auth)
 			        } catch(e) {
 				        console.error(e)
 			        } finally {
