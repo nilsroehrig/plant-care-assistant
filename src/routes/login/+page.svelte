@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { signInWithEmailAndPassword } from 'firebase/auth';
+  import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
   import { enhance } from '$app/forms';
   import { getContext } from 'svelte';
   import { fade } from 'svelte/transition';
@@ -12,6 +12,12 @@
   };
 
   let busy = false;
+
+  async function loginWithGoogle() {
+    const provider = new GoogleAuthProvider();
+    const signInResult = await signInWithPopup($firebase.auth, provider)
+    return signInResult.user.getIdToken();
+  }
 </script>
 
 <main class="container">
@@ -59,6 +65,14 @@
         {/if}
         <button type="submit" aria-busy={busy}>Login</button>
       </form>
+      <div>
+        <form method="post" action="?/login" use:enhance={async ({formData}) => {
+            const idToken = await loginWithGoogle();
+            formData.set("idToken", idToken);
+        }}>
+          <button type="submit">Login with Google</button>
+        </form>
+      </div>
     </div>
     <div class="image"/>
   </article>
