@@ -1,4 +1,4 @@
-import { error, fail, redirect } from '@sveltejs/kit';
+import { type Actions, error, fail, redirect } from '@sveltejs/kit';
 import { getAuth } from 'firebase-admin/auth';
 import { FieldValue, Timestamp, getFirestore } from 'firebase-admin/firestore';
 import { DateTime } from 'luxon';
@@ -107,7 +107,7 @@ export const actions = {
 
 		throw redirect(302, '/app');
 	}
-};
+} satisfies Actions;
 
 function toFormattedErrors(formattedIssues: Record<string, string[]>, issue: ZodIssue) {
 	const field = issue.path.at(0);
