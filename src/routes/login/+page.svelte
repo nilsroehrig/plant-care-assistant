@@ -4,7 +4,6 @@
   import { getContext } from 'svelte';
   import { fade } from 'svelte/transition';
   import type { FirebaseStore } from '../+layout.svelte';
-  import { goto } from "$app/navigation";
 
   const firebase = getContext<FirebaseStore>('firebase');
 
@@ -13,8 +12,6 @@
   };
 
   let busy = false;
-
-  // $: disabled = $firebase.auth == null;
 </script>
 
 <main class="container">
