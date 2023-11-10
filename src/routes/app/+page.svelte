@@ -16,7 +16,7 @@
 	<div class="dashboard">
 		<article class="header">
 			<hgroup>
-				<h1>Hi {user.displayName},</h1>
+				<h1>Hi {user.displayName ?? user.email},</h1>
 				<h2>Take a look at your plants here!</h2>
 			</hgroup>
 		</article>
