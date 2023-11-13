@@ -66,22 +66,6 @@ export const actions = {
 			});
 		}
 
-		const idToken = cookies.get('idToken');
-
-		if (!idToken) {
-			throw error(401);
-		}
-
-		let uid;
-
-		try {
-			const userCred = await getAuth(locals.app).verifyIdToken(idToken);
-			uid = userCred.uid;
-		} catch (e) {
-			functions.logger.error(e);
-			throw error(401);
-		}
-
 		try {
 			const db = getFirestore(locals.app);
 
@@ -93,7 +77,7 @@ export const actions = {
 				amountPerWateringInMilliliters: formParseResult.data.watering_amount,
 				lastWatered: toUTCOrServerTimestamp(formParseResult.data.last_watering),
 				furtherInstructions: formParseResult.data.instructions,
-				owner: uid,
+				owner: locals.uid,
 				created: FieldValue.serverTimestamp(),
 				imageUrl: formParseResult.data.plant_image_url ?? '/placeholder.png',
 				fertilizingIntervalInWeeks: formParseResult.data.fertilizing_interval,

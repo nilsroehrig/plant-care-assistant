@@ -7,13 +7,13 @@ export async function handle({ resolve, event }) {
 	event.locals.app = adminApp();
 
 	if (event.url.pathname.startsWith('/app')) {
-		const idToken = event.cookies.get('__session');
-		if (!idToken) {
+		const sessionCookie = event.cookies.get('__session');
+		if (!sessionCookie) {
 			throw redirect(302, '/login');
 		}
 
 		try {
-			const decodedIdToken = await getAuth(event.locals.app).verifySessionCookie(idToken, true);
+			const decodedIdToken = await getAuth(event.locals.app).verifySessionCookie(sessionCookie, true);
 			event.locals.uid = decodedIdToken.uid;
 		} catch (e) {
 			functions.logger.error(e);

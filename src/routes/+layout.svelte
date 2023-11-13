@@ -1,8 +1,10 @@
 <script lang="ts" context="module">
   import type { Readable } from "svelte/store";
+  import type { User } from "firebase/auth";
 
   type FirebaseStoreData = {
     app: FirebaseApp;
+    user: User | null;
   };
 
   export type FirebaseStore = Readable<FirebaseStoreData>;
@@ -17,7 +19,7 @@
   import { initializeApp, type FirebaseApp } from 'firebase/app';
   import {
     browserSessionPersistence,
-    getAuth,
+    getAuth, onAuthStateChanged,
     signOut,
     type Unsubscribe
   } from 'firebase/auth';
@@ -32,6 +34,7 @@
   const app = initializeApp(config);
   const firebaseStore: Writable<FirebaseStoreData> = writable({
     app,
+    User: null,
   });
   setContext('firebase', readonly(firebaseStore));
 
@@ -39,6 +42,9 @@
   if (browser) {
     auth = getAuth(app);
     auth.setPersistence(browserSessionPersistence).catch(console.error);
+    onAuthStateChanged(auth, (user) => {
+      firebaseStore.update((store) => ({ ...store, user }));
+    });
   }
 
   let isLoggingOut = false;
@@ -56,7 +62,7 @@
         <li><strong>Plant Care Assistant</strong></li>
       </ul>
       <ul>
-        {#if auth?.currentUser}
+        {#if $firebaseStore.user}
           <li>
             <a href="/app/create-plant" role="button" class="outline"
             >

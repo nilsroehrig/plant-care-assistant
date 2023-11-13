@@ -9,7 +9,7 @@ export const actions = {
 			throw redirect(302, '/login');
 		}
 
-		const sessionCookie = await adminApp().auth().createSessionCookie(idToken as string, {expiresIn: 60 * 60 * 24 * 5});
+		const sessionCookie = await adminApp().auth().createSessionCookie(idToken as string, {expiresIn: 60 * 1000 * 60 * 24 * 5});
 		cookies.set('__session', sessionCookie, {
 			maxAge: 60 * 60 * 24 * 5,
 			sameSite: 'lax',
