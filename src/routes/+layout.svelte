@@ -1,22 +1,13 @@
-<script lang="ts" context="module">
-	import type { Readable } from 'svelte/store';
-	import type { User } from 'firebase/auth';
-
-	type FirebaseStoreData = {
-		app: FirebaseApp;
-		user: User | null;
-	};
-
-	export type FirebaseStore = Readable<FirebaseStoreData>;
-</script>
-
 <script lang="ts">
 	import '$lib/styles/global.css';
 	import '@picocss/pico';
 
-	import { browser, dev } from '$app/environment';
+	import { browser } from '$app/environment';
+	import { enhance } from '$app/forms';
 	import { config } from '$lib/config/firebaseConfig';
-	import { initializeApp, type FirebaseApp } from 'firebase/app';
+	import type { FirebaseStoreData } from '$lib/stores/FirebaseStore';
+	import { initializeApp } from 'firebase/app';
+	import type { Auth } from 'firebase/auth';
 	import {
 		browserSessionPersistence,
 		getAuth,
@@ -24,19 +15,16 @@
 		signOut,
 		type Unsubscribe
 	} from 'firebase/auth';
-	import { onDestroy, setContext } from 'svelte';
+	import { setContext } from 'svelte';
 	import { Icon, Plus } from 'svelte-hero-icons';
 	import { readonly, writable, type Writable } from 'svelte/store';
-	import { enhance } from '$app/forms';
-	import type { Auth } from 'firebase/auth';
-
-	const subscriptions: Unsubscribe[] = [];
 
 	const app = initializeApp(config);
 	const firebaseStore: Writable<FirebaseStoreData> = writable({
 		app,
 		user: null
 	});
+
 	setContext('firebase', readonly(firebaseStore));
 
 	let auth: Auth;
@@ -49,11 +37,6 @@
 	}
 
 	let isLoggingOut = false;
-
-	onDestroy(() => {
-		subscriptions.forEach((unsubscribe) => unsubscribe());
-		subscriptions.length = 0;
-	});
 </script>
 
 <div class="wrapper">

@@ -1,44 +1,16 @@
 <script lang="ts">
-	import { getContext } from 'svelte';
-	import type { FirebaseStore } from '../+layout.svelte';
+	import Notification from '$lib/components/Notification.svelte';
 	import PlantCard from '$lib/components/PlantCard.svelte';
-	import { BellAlert, Icon, XMark } from 'svelte-hero-icons';
-	import {
-		onSnapshot,
-		getFirestore,
-		query,
-		collection,
-		where,
-		Timestamp
-	} from 'firebase/firestore';
-	import type { FirebaseApp } from 'firebase/app';
-	import { browser } from '$app/environment';
+	import type { FirebaseStore } from '$lib/stores/FirebaseStore.js';
+	import { getContext } from 'svelte';
+	import { createNotificationStore } from '../../lib/stores/NotificationStore.js';
 
 	const firebase = getContext<FirebaseStore>('firebase');
+	const notification = createNotificationStore(firebase);
 
 	export let data;
 
-	let notification = '';
-	$: hasNotification = notification !== '';
-
-	$: if (browser && $firebase.user) {
-		const firebaseApp: FirebaseApp = $firebase.app!;
-		const firestore = getFirestore(firebaseApp);
-		const q = query(
-			collection(firestore, 'notifications'),
-			where('owner', '==', $firebase.user.uid),
-			where('createdAt', '>=', Timestamp.fromDate(new Date()))
-		);
-		onSnapshot(q, (querySnapshot) => {
-			querySnapshot.forEach((doc) => {
-				notification = doc.data().message;
-			});
-		});
-	}
-
-	function resetNotification() {
-		notification = '';
-	}
+	$: hasNotification = $notification !== '';
 </script>
 
 {#if !$firebase.user}
@@ -55,15 +27,7 @@
 			<PlantCard {plant} />
 		{/each}
 		{#if hasNotification}
-			<article class="notification container">
-				<span class="notification-icon">
-					<Icon src={BellAlert} width={32} />
-				</span>
-				<span class="notification-message">{notification}</span>
-				<button on:click={resetNotification} class="outline secondary"
-					><Icon src={XMark} width={24} /></button
-				>
-			</article>
+			<Notification notification={$notification} on:dismiss={notification.dismiss} />
 		{/if}
 	</div>
 {/if}
@@ -86,36 +50,5 @@
 
 	hgroup {
 		margin-bottom: 0;
-	}
-
-	.notification {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		grid-template-columns: min-content auto min-content;
-		padding: 1rem;
-		position: fixed;
-		bottom: 3rem;
-		left: 50%;
-		transform: translateX(-50%);
-		z-index: 100;
-		gap: 1rem;
-	}
-
-	.notification-icon {
-		flex: 0;
-		padding: 0.5rem;
-	}
-
-	.notification-message {
-		flex: 1;
-	}
-
-	.notification > button {
-		padding: 0.5rem;
-		flex: 0;
-		margin: 0;
-		background: transparent;
-		border: 0;
 	}
 </style>
