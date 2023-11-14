@@ -13,15 +13,15 @@ created: FieldValue.serverTimestamp()
 import { Timestamp } from 'firebase-admin/firestore';
 import { z } from 'zod';
 
-const Plant = z.object({
-	name: z.string(),
-	wateringIntervalInHours: z.number(),
-	amountPerWateringInMilliliters: z.number(),
-	lastWatered: z.instanceof(Timestamp),
-	furtherInstructions: z.string().nullish(),
-	owner: z.string(),
-	created: z.instanceof(Timestamp)
-});
+// const Plant = z.object({
+// 	name: z.string(),
+// 	wateringIntervalInHours: z.number(),
+// 	amountPerWateringInMilliliters: z.number(),
+// 	lastWatered: z.instanceof(Timestamp),
+// 	furtherInstructions: z.string().nullish(),
+// 	owner: z.string(),
+// 	created: z.instanceof(Timestamp)
+// });
 
 export const PlantDto = z.object({
 	id: z.string(),
@@ -31,6 +31,14 @@ export const PlantDto = z.object({
 	lastWatered: z.preprocess((lastWatered) => {
 		if (lastWatered instanceof Timestamp) {
 			return lastWatered.toDate().toISOString();
+		}
+		return null;
+	}, z.string().datetime()),
+	fertilizingIntervalInWeeks: z.number(),
+	amountPerFertilizingInGrams: z.number(),
+	lastFertilized: z.preprocess((lastFertilized) => {
+		if (lastFertilized instanceof Timestamp) {
+			return lastFertilized.toDate().toISOString();
 		}
 		return null;
 	}, z.string().datetime()),
