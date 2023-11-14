@@ -1,21 +1,20 @@
 import { type Actions, error, fail, redirect } from '@sveltejs/kit';
-import { getAuth } from 'firebase-admin/auth';
 import { FieldValue, Timestamp, getFirestore } from 'firebase-admin/firestore';
 import { DateTime } from 'luxon';
 import { z, type ZodIssue } from 'zod';
 import functions from 'firebase-functions';
 
 const DateSchema = z.preprocess((v) => {
-		if (typeof v !== 'string') {
-			return v;
-		}
-		if (v == '') {
-			return null;
-		}
-		const foo = new Date(v).toISOString();
-		console.log(foo);
-		return foo;
-	}, z.string().datetime().nullable())
+	if (typeof v !== 'string') {
+		return v;
+	}
+	if (v == '') {
+		return null;
+	}
+	const foo = new Date(v).toISOString();
+	console.log(foo);
+	return foo;
+}, z.string().datetime().nullable());
 
 const PlantFormSchema = z.object({
 	name: z.string().min(3),
