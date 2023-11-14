@@ -11,3 +11,4 @@ vite.config.ts.timestamp-*
 *.log
 .firebase
 .idea
+notification-creator-service-account.json
