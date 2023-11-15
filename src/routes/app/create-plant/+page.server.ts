@@ -1,21 +1,20 @@
 import { type Actions, error, fail, redirect } from '@sveltejs/kit';
-import { getAuth } from 'firebase-admin/auth';
 import { FieldValue, Timestamp, getFirestore } from 'firebase-admin/firestore';
 import { DateTime } from 'luxon';
 import { z, type ZodIssue } from 'zod';
 import functions from 'firebase-functions';
 
 const DateSchema = z.preprocess((v) => {
-		if (typeof v !== 'string') {
-			return v;
-		}
-		if (v == '') {
-			return null;
-		}
-		const foo = new Date(v).toISOString();
-		console.log(foo);
-		return foo;
-	}, z.string().datetime().nullable())
+	if (typeof v !== 'string') {
+		return v;
+	}
+	if (v == '') {
+		return null;
+	}
+	const foo = new Date(v).toISOString();
+	console.log(foo);
+	return foo;
+}, z.string().datetime().nullable());
 
 const PlantFormSchema = z.object({
 	name: z.string().min(3),
@@ -66,22 +65,6 @@ export const actions = {
 			});
 		}
 
-		const idToken = cookies.get('idToken');
-
-		if (!idToken) {
-			throw error(401);
-		}
-
-		let uid;
-
-		try {
-			const userCred = await getAuth(locals.app).verifyIdToken(idToken);
-			uid = userCred.uid;
-		} catch (e) {
-			functions.logger.error(e);
-			throw error(401);
-		}
-
 		try {
 			const db = getFirestore(locals.app);
 
@@ -93,7 +76,7 @@ export const actions = {
 				amountPerWateringInMilliliters: formParseResult.data.watering_amount,
 				lastWatered: toUTCOrServerTimestamp(formParseResult.data.last_watering),
 				furtherInstructions: formParseResult.data.instructions,
-				owner: uid,
+				owner: locals.uid,
 				created: FieldValue.serverTimestamp(),
 				imageUrl: formParseResult.data.plant_image_url ?? '/placeholder.png',
 				fertilizingIntervalInWeeks: formParseResult.data.fertilizing_interval,

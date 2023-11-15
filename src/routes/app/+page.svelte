@@ -1,28 +1,34 @@
 <script lang="ts">
-	import { getContext } from 'svelte';
-	import type { FirebaseStore } from '../+layout.svelte';
+	import Notification from '$lib/components/Notification.svelte';
 	import PlantCard from '$lib/components/PlantCard.svelte';
+	import type { FirebaseStore } from '$lib/stores/FirebaseStore.js';
+	import { getContext } from 'svelte';
+	import { createNotificationStore } from '../../lib/stores/NotificationStore.js';
 
 	const firebase = getContext<FirebaseStore>('firebase');
+	const notification = createNotificationStore(firebase);
 
 	export let data;
 
-	$: user = $firebase.auth?.currentUser;
+	$: hasNotification = $notification !== '';
 </script>
 
-{#if !user}
+{#if !$firebase.user}
 	<article aria-busy="true"></article>
 {:else}
 	<div class="dashboard">
 		<article class="header">
 			<hgroup>
-				<h1>Hi {user.displayName ?? user.email},</h1>
+				<h1>Hi {$firebase.user.displayName ?? $firebase.user.email},</h1>
 				<h2>Take a look at your plants here!</h2>
 			</hgroup>
 		</article>
 		{#each data.plants as plant}
 			<PlantCard {plant} />
 		{/each}
+		{#if hasNotification}
+			<Notification notification={$notification} on:dismiss={notification.dismiss} />
+		{/if}
 	</div>
 {/if}
 

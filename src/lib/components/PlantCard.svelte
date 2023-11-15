@@ -1,14 +1,23 @@
 <script lang="ts">
 	import type { PlantDto } from '$lib/domain/Plant';
 	import { DateTime } from 'luxon';
-	import { Icon, Clipboard, Pencil } from 'svelte-hero-icons';
+	import { Clipboard, Icon, Pencil } from 'svelte-hero-icons';
 
 	export let plant: PlantDto;
 
+	let open = false;
+
 	$: lastWatered = DateTime.fromISO(plant.lastWatered);
-	$: isOverdue = lastWatered.plus({ hours: plant.wateringIntervalInHours }) < DateTime.now();
-	$: isFine =
-		lastWatered.plus({ hours: plant.wateringIntervalInHours }) > DateTime.now().plus({ days: 1 });
+	$: lastFertilized = DateTime.fromISO(plant.lastFertilized);
+	$: wateringOverdue = lastWatered.plus({ hours: plant.wateringIntervalInHours }) < DateTime.now();
+	$: fertilizingOverdue =
+		lastWatered.plus({ weeks: plant.fertilizingIntervalInWeeks }) < DateTime.now();
+
+	$: console.dir({
+		lastWatered: lastWatered.toJSDate(),
+		lastWateredPlusInterval: lastWatered.plus({ hours: plant.wateringIntervalInHours }).toJSDate()
+	});
+
 	const formatter = Intl.DateTimeFormat('en-UK', {
 		weekday: 'short',
 		year: 'numeric',
@@ -17,6 +26,10 @@
 		hour: 'numeric',
 		minute: 'numeric'
 	});
+
+	function toggle() {
+		open = !open;
+	}
 </script>
 
 <article>
@@ -31,16 +44,20 @@
 		</strong>
 
 		<small>Last Watering:</small>
-		<strong class:is-overdue={isOverdue} class:is-fine={isFine}>
+		<strong class:is-overdue={wateringOverdue} class:is-fine={!wateringOverdue}>
 			{formatter.format(lastWatered.toJSDate())}
 		</strong>
 	</div>
 	<div class="actions">
-		{#if plant.furtherInstructions}
-			<button class="contrast small" data-tooltip="Instructions" data-placement="top">
-				<Icon src={Clipboard} width={20} />
-			</button>
-		{/if}
+		<button
+			class="contrast small"
+			data-tooltip="Details"
+			data-placement="top"
+			on:click={() => (open = true)}
+		>
+			<Icon src={Clipboard} width={20} />
+		</button>
+
 		<a
 			href="/app/edit-plant/{plant.id}"
 			role="button"
@@ -51,6 +68,45 @@
 			<Icon src={Pencil} width={20} />
 		</a>
 	</div>
+
+	<dialog {open}>
+		<article>
+			<header>
+				{plant.name}
+				<a href="#close" aria-label="Close" class="close" on:click={toggle}></a>
+			</header>
+			<div class="grid">
+				<div class="stats">
+					<small>Watering Schedule:</small>
+					<strong>
+						{plant.amountPerWateringInMilliliters}<abbr title="Milliliters">ml</abbr> every {plant.wateringIntervalInHours}
+						hours.
+					</strong>
+
+					<small>Last Watering:</small>
+					<strong class:is-overdue={wateringOverdue} class:is-fine={!wateringOverdue}>
+						{formatter.format(lastWatered.toJSDate())}
+					</strong>
+				</div>
+				<div class="stats">
+					<small>Fertilizing Schedule:</small>
+					<strong>
+						{plant.amountPerFertilizingInGrams}<abbr title="Grams">g</abbr> every {plant.fertilizingIntervalInWeeks}
+						weeks.
+					</strong>
+
+					<small>Last Fertilizing:</small>
+					<strong class:is-overdue={fertilizingOverdue} class:is-fine={!fertilizingOverdue}>
+						{formatter.format(lastFertilized.toJSDate())}
+					</strong>
+				</div>
+			</div>
+			{#if plant.furtherInstructions}
+				<h3>Further Instructions</h3>
+				<pre>{plant.furtherInstructions}</pre>
+			{/if}
+		</article>
+	</dialog>
 </article>
 
 <style>
@@ -102,5 +158,20 @@
 		--form-element-spacing-vertical: 0.375rem;
 		--form-element-spacing-horizontal: 0.5rem;
 		font-size: smaller;
+	}
+
+	dialog > article {
+		width: 80%;
+	}
+
+	h3 {
+		margin: 2rem 0 1rem;
+	}
+
+	pre {
+		padding: 1rem;
+		white-space: pre-wrap;
+		text-align: left;
+		margin-bottom: 0;
 	}
 </style>

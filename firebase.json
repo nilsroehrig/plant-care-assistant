@@ -24,5 +24,8 @@
 			"enabled": true
 		},
 		"singleProjectMode": true
+	},
+	"firestore": {
+		"rules": "rules/firestore.rules"
 	}
 }
